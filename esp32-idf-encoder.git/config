@@ -1,0 +1,11 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = true
+	ignorecase = true
+	precomposeunicode = true
+[push]
+	default = matching
+[remote "origin"]
+	url = https://github.com/OleksandrSavch/esp32-idf-encoder.git
+	fetch = +refs/heads/*:refs/remotes/origin/*

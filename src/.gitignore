@@ -1,0 +1,39 @@
+# PlatformIO build files
+.pio/
+.pioenvs/
+.piodebug/
+build/
+
+# PlatformIO configuration history
+.vscode/
+
+# Python environment (якщо є)
+env/
+venv/
+.venv/
+
+# OS / IDE junk
+.DS_Store
+Thumbs.db
+
+# Compiled files
+*.elf
+*.bin
+*.hex
+*.map
+
+# SPIFFS / LittleFS images
+spiffs.bin
+littlefs.bin
+
+# Backup or temp files
+*.bak
+*.tmp
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# PlatformIO upload file
+upload_flags.json

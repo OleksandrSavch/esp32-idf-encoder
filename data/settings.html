@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Encoder Settings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg-color: #111;
+      --text-color: #0f0;
+      --label-color: #999;
+      --button-bg: #444;
+      --button-hover: #666;
+      --font-main: 'Courier New', monospace;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-main);
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 1.5em;
+      color: var(--label-color);
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.3rem;
+      color: var(--label-color);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    input {
+      width: 95%;
+      padding: 0.6rem;
+      font-size: 1rem;
+      background-color: #222;
+      color: var(--text-color);
+      border: 1px solid #333;
+      border-radius: 6px;
+    }
+
+    .button,
+    a.button-link {
+      margin-top: 1rem;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      background-color: var(--button-bg);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .button:hover,
+    a.button-link:hover {
+      background-color: var(--button-hover);
+    }
+
+    .message {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 600px) {
+      input {
+        font-size: 1rem;
+      }
+
+      .button,
+      a.button-link {
+        width: 100%;        
+        font-size: 1rem;
+        padding: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Settings</h1>
+
+  <div class="form-group">
+    <label for="diameter">Wheel Diameter (mm)</label>
+    <input id="diameter" type="number" step="0.01" placeholder="e.g. 32.00" />
+  </div>
+
+  <div class="form-group">
+    <label for="factor">Calibration Factor</label>
+    <input id="factor" type="number" step="0.001" placeholder="e.g. 1.255" />
+  </div>
+
+  <button class="button" onclick="saveSettings()">💾 Save</button>
+  <button class="button" onclick="loadSettings()">🔄 Read from memory</button>
+  <a href="/index.html" class="button-link">⬅ Back to Monitor</a>
+
+  <div class="message" id="msg"></div>
+
+  <script>
+    function saveSettings() {
+      const diameterStr = document.getElementById("diameter").value.trim();
+      const factorStr = document.getElementById("factor").value.trim();
+      const msg = document.getElementById("msg");
+
+      const json = {};
+
+      if (diameterStr !== "") {
+        json.diameter = parseFloat(diameterStr.replace(',', '.'));
+      }
+      if (factorStr !== "") {
+        json.factor = parseFloat(factorStr.replace(',', '.'));
+      }
+
+      if (Object.keys(json).length === 0) {
+        msg.textContent = "Please enter at least one value.";
+        msg.style.color = "orange";
+        return;
+      }
+
+      fetch("/api/settings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(json)
+      })
+        .then(res => {
+          if (res.ok) {
+            msg.textContent = "✅ Settings saved successfully.";
+            msg.style.color = "lime";
+          } else {
+            msg.textContent = "❌ Failed to save settings.";
+            msg.style.color = "red";
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          msg.textContent = "❗ Connection error.";
+          msg.style.color = "red";
+        });
+    }
+
+    function loadSettings() {
+      const msg = document.getElementById("msg");
+      fetch("/api/settings")
+        .then(res => {
+          if (!res.ok) throw new Error("Failed to load settings");
+          return res.json();
+        })
+        .then(data => {
+          document.getElementById("diameter").value = data.diameter?.toFixed(2) ?? "";
+          document.getElementById("factor").value = data.factor?.toFixed(3) ?? "";
+          msg.textContent = "📥 Settings loaded.";
+          msg.style.color = "lime";
+        })
+        .catch(err => {
+          console.error(err);
+          msg.textContent = "❗ Error loading settings.";
+          msg.style.color = "red";
+        });
+    }
+
+    window.onload = loadSettings;
+  </script>
+</body>
+</html>

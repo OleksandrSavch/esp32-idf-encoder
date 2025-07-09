@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Encoder Monitor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg-color: #111;
+      --text-color: #0f0;
+      --label-color: #999;
+      --button-bg: #444;
+      --button-hover: #666;
+      --font-main: 'Courier New', monospace;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-main);
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 1.5em;
+      color: var(--label-color);
+      margin-bottom: 1rem;
+    }
+
+    .display {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .value-block {
+      font-size: 3rem;
+      font-weight: bold;
+      margin: 0.3rem 0;
+    }
+
+    .label {
+      font-size: 1rem;
+      color: var(--label-color);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    button,
+    a.button-link {
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      background-color: var(--button-bg);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 1rem;
+    }
+
+    button:hover,
+    a.button-link:hover {
+      background-color: var(--button-hover);
+    }
+
+    @media (max-width: 600px) {
+      .value-block {
+        font-size: 2.2rem;
+      }
+
+      button,
+      a.button-link {
+        width: 100%;
+        font-size: 1rem;
+        padding: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Monitor</h1>
+
+  <div class="display">
+    <div class="label">Distance (m)</div>
+    <div class="value-block" id="distance">--</div>
+
+    <div class="label">Speed (m/s)</div>
+    <div class="value-block" id="speed">--</div>
+  </div>
+
+  <button onclick="resetCounter()">Reset Counter</button>
+  <a href="/settings.html" class="button-link">⚙ Settings</a>
+
+  <script>
+    async function fetchData() {
+      try {
+        const response = await fetch('/data');
+        const json = await response.json();
+        document.getElementById('distance').textContent = json.distance.toFixed(2);
+        document.getElementById('speed').textContent = json.speed.toFixed(2);
+      } catch (e) {
+        console.error("Error fetching /data:", e);
+      }
+    }
+
+    async function resetCounter() {
+      try {
+        const res = await fetch('/reset', { method: 'POST' });
+        if (res.ok) {
+          alert('Counter reset!');
+        } else {
+          alert('Reset failed');
+        }
+      } catch (e) {
+        alert('Error sending reset request');
+      }
+    }
+
+    setInterval(fetchData, 1000);
+    fetchData();
+  </script>
+</body>
+</html>
